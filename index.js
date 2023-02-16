@@ -176,3 +176,30 @@ function promptForTeamMemberData(prompts) {
         });
     });
   }
+
+ // Define the function to create an HTML card for a team member
+function createTeamMemberCard(member) {
+    const role = member.getRole();
+    const memberName = member.getName();
+    const memberId = member.getID();
+    const memberEmail = member.getEmail();
+
+    let extraInfo = '';
+
+    switch (role) {
+        case 'Manager':
+            extraInfo = `Office Number: ${member.officeNumber}`;
+            break;
+        case 'Engineer':
+            extraInfo = `GitHub: <a href="https://github.com/${member.github}" target="_blank">${member.github}</a>`;
+            break;
+        case 'Intern':
+            extraInfo = `School: ${member.school}`;
+            break;
+        default:
+            extraInfo = '';
+            break;
+    }
+
+    return `<div class="card"> <div class="card-header"> <h2>${memberName}</h2> <h3>${role}</h3> </div> <div class="card-body"> <p>ID: ${memberId}</p> <p>Email: <a href="mailto:${memberEmail}">${memberEmail}</a></p> <p>${extraInfo}</p> </div> </div>`;
+}
