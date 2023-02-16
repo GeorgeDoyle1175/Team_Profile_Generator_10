@@ -150,3 +150,29 @@ const addAnotherPrompts = [
         choices: ['Yes', 'No']
     }
 ];
+
+// Define the function to prompt the user for team member data
+function promptForTeamMemberData(prompts) {
+    return new Promise((resolve, reject) => {
+      inquirer.prompt(prompts)
+        .then(answers => {
+          resolve(answers);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
+
+  // Define the function to prompt the user for adding another team member
+  function promptForAddAnother() {
+    return new Promise((resolve, reject) => {
+      inquirer.prompt(addAnotherPrompts)
+        .then(answers => {
+          resolve(answers.addAnother === 'Yes');
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  }
