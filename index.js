@@ -1,6 +1,8 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
 
+const teamMembers = [];
+
 // Define the team member classes
 class Employee {
     constructor(name, id, email) {
@@ -32,6 +34,10 @@ class Manager extends Employee {
         this.officeNumber = officeNumber;
     }
 
+    getOfficeNumber() {
+        return this.officeNumber;
+    }
+
     getRole() {
         return 'Manager';
     }
@@ -43,6 +49,10 @@ class Engineer extends Employee {
         this.github = github;
     }
 
+    getGithub(){
+        return this.github;
+    }
+
     getRole() {
         return 'Engineer';
     }
@@ -52,6 +62,10 @@ class Intern extends Employee {
     constructor(name, id, email, school) {
         super(name, id, email);
         this.school = school;
+    }
+
+    getSchool(){
+        return this.school;
     }
 
     getRole() {
@@ -141,65 +155,153 @@ const internPrompts = [
     }
 ];
 
-// Define the prompt for adding another team member
-const addAnotherPrompts = [
-    {
-        type: 'list',
-        name: 'addAnother',
-        message: 'Do you want to add another team member?',
-        choices: ['Yes', 'No']
-    }
-];
+function promptManagerData() {
+    console.log("\nPlease provide the following information about the manager:");
 
-// Define the function to prompt the user for team member data
-function promptForTeamMemberData(prompts) {
-    return new Promise((resolve, reject) => {
-      inquirer.prompt(prompts)
-        .then(answers => {
-          resolve(answers);
-        })
-        .catch(error => {
-          reject(error);
-        });
+    // Use the `engineerprompts` variable to prompt the user for the engineer's information
+    return inquirer.prompt(managerPrompts).then((response) => {
+        // Create a new Engineer object with the user's input
+        const manager = new Manager(response.name, response.id, response.email, response.officeNumber);
+        return manager;
     });
-  }
-
-  // Define the function to prompt the user for adding another team member
-  function promptForAddAnother() {
-    return new Promise((resolve, reject) => {
-      inquirer.prompt(addAnotherPrompts)
-        .then(answers => {
-          resolve(answers.addAnother === 'Yes');
-        })
-        .catch(error => {
-          reject(error);
-        });
-    });
-  }
-
- // Define the function to create an HTML card for a team member
-function createTeamMemberCard(member) {
-    const role = member.getRole();
-    const memberName = member.getName();
-    const memberId = member.getID();
-    const memberEmail = member.getEmail();
-
-    let extraInfo = '';
-
-    switch (role) {
-        case 'Manager':
-            extraInfo = `Office Number: ${member.officeNumber}`;
-            break;
-        case 'Engineer':
-            extraInfo = `GitHub: <a href="https://github.com/${member.github}" target="_blank">${member.github}</a>`;
-            break;
-        case 'Intern':
-            extraInfo = `School: ${member.school}`;
-            break;
-        default:
-            extraInfo = '';
-            break;
-    }
-
-    return `<div class="card"> <div class="card-header"> <h2>${memberName}</h2> <h3>${role}</h3> </div> <div class="card-body"> <p>ID: ${memberId}</p> <p>Email: <a href="mailto:${memberEmail}">${memberEmail}</a></p> <p>${extraInfo}</p> </div> </div>`;
 }
+
+function promptEngineerData() {
+    console.log("\nPlease provide the following information about the engineer:");
+
+    // Use the `engineerprompts` variable to prompt the user for the engineer's information
+    return inquirer.prompt(engineerPrompts).then((response) => {
+        // Create a new Engineer object with the user's input
+        const engineer = new Engineer(response.name, response.id, response.email, response.github);
+        return engineer;
+    });
+}
+
+// Function to prompt the user for intern data
+function promptInternData() {
+    console.log("\nPlease provide the following information about the intern:");
+
+    // Use the `internprompts` variable to prompt the user for the intern's information
+    return inquirer.prompt(internPrompts).then((response) => {
+        // Create a new Intern object with the user's input
+        const intern = new Intern(response.name, response.id, response.email, response.school);
+        return intern;
+    });
+}
+
+function generateHTML(teamMembers) {
+    const header = `
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Team Members</title>
+        <link rel="stylesheet" href="styles.css">
+      </head>
+    `;
+
+    let cards = '';
+    let count = 0;
+    for (const teamMember of teamMembers) {
+      let info = '';
+      if (teamMember.getRole() === 'Manager') {
+        info = `Office Number: ${teamMember.getOfficeNumber()}`;
+      } else if (teamMember.getRole() === 'Engineer') {
+        info = `GitHub: <a href="https://github.com/${teamMember.getGithub()}" target="_blank">${teamMember.getGithub()}</a>`;
+      } else if (teamMember.getRole() === 'Intern') {
+        info = `School: ${teamMember.getSchool()}`;
+      }
+
+      const card = `
+        <div class="card">
+          <div class="card-header">
+            <h2>${teamMember.getName()}</h2>
+            <h3>${teamMember.getRole()}</h3>
+          </div>
+          <div class="card-body">
+            <div>ID: ${teamMember.getID()}</div>
+            <div>Email: <a href="mailto:${teamMember.getEmail()}">${teamMember.getEmail()}</a></div>
+            <div>${info}</div>
+          </div>
+        </div>
+      `;
+
+      cards += card;
+      count++;
+
+      if (count % 5 === 0) {
+        cards += '</div><div class="row">';
+      }
+    }
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        ${header}
+        <body>
+          <div class="container">
+            <h1>Team Members</h1>
+            <div class="cards">
+              <div class="row">
+                ${cards}
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `;
+
+    fs.writeFile('index.html', html, (err) => {
+      if (err) throw err;
+      console.log('index.html created successfully!');
+    });
+  }
+
+const init = async () => {
+    try {
+      // Prompt the user for the team manager's data
+      const managerData = await promptManagerData('Manager');
+
+      // Initialize an array to hold the team members
+      const teamMembers = [];
+
+      // Push team manager's data to teamMembers array
+      teamMembers.push(managerData);
+
+      const addTeamMember = () => {
+        inquirer
+          .prompt({
+            type: 'list',
+            name: 'teamMemberType',
+            message: 'What type of team member would you like to add?',
+            choices: ['Engineer', 'Intern', 'Finish building my team'],
+          })
+          .then((answers) => {
+            const teamMemberType = answers.teamMemberType;
+
+            if (teamMemberType === 'Finish building my team') {
+              console.log('Finished building team!');
+              generateHTML(teamMembers);
+            } else {
+              if (teamMemberType === 'Engineer') {
+                promptEngineerData().then((teamMemberData) => {
+                  teamMembers.push(teamMemberData);
+                  addTeamMember();
+                });
+              } else {
+                promptInternData().then((teamMemberData) => {
+                  teamMembers.push(teamMemberData);
+                  addTeamMember();
+                });
+              }
+            }
+          });
+      };
+
+      addTeamMember();
+    } catch (error) {
+      console.error('Error occurred while building team:', error);
+    }
+  };
+
+
+init();
