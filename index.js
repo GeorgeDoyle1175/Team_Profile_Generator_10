@@ -72,6 +72,13 @@ class Intern extends Employee {
         return 'Intern';
     }
 }
+//Export Class Constructors
+module.exports = {
+    Employee,
+    Manager,
+    Engineer,
+    Intern
+  };
 
 // Define the prompts for the team member types
 const managerPrompts = [
@@ -195,7 +202,7 @@ function generateHTML(teamMembers) {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Team Members</title>
-        <link rel="stylesheet" href="styles.css">
+        <link rel="stylesheet" href="./lib/styles.css">
       </head>
     `;
 
@@ -257,7 +264,7 @@ function generateHTML(teamMembers) {
   }
 
 const init = async () => {
-    try {
+    //try {
       // Prompt the user for the team manager's data
       const managerData = await promptManagerData('Manager');
 
@@ -294,13 +301,14 @@ const init = async () => {
                 });
               }
             }
-          });
+          })
+          .catch(error => console.error(error))
       };
 
       addTeamMember();
-    } catch (error) {
-      console.error('Error occurred while building team:', error);
-    }
+    // } catch (error) {
+    //   console.error('Error occurred while building team:', error);
+    // }
   };
 
 init();

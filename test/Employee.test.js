@@ -1,5 +1,5 @@
 // Import the Employee class
-const Employee = require('./Employee');
+const { Employee } = require('../index');
 
 // Define the test suite
 describe('Employee', () => {
